@@ -60,8 +60,24 @@ function print_city(city_id, city_index) {
     }
 }
 
-$(".hover").mouseleave(
-    function() {
-        $(this).removeClass("hover");
+// Hover class cleanup (vanilla JS, no jQuery needed)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.hover').forEach(function(el) {
+        el.addEventListener('mouseleave', function() {
+            el.classList.remove('hover');
+        });
+    });
+});
+
+// Auto-populate State dropdown if #sts exists
+function autoInitState() {
+    var el = document.getElementById('sts');
+    if (el && el.options.length <= 1) {
+        print_state('sts');
     }
-);
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoInitState);
+} else {
+    autoInitState();
+}

@@ -1,0 +1,12 @@
+{
+  "home_title": "Find out the most suitable crop to grow in your farm",
+  "home_subtitle": "Precision Agriculture Using Machine Learning & IoT",
+  "about_title": "Improving Agriculture, Cultivating Crops To Maximize Farmer Prosperity.",
+  "about_desc": "We use state-of-the-art machine learning (Random Forest) and deep convolutional neural networks (PyTorch ResNet-9) to guide farmers through the entire farming lifecycle. Make informed decisions to understand your regional soil chemistry, manage soil deficits, and accurately detect plant leaf diseases with actionable remedies.",
+  "details_heading": "GeoCropAI — Technical Architecture & Overview",
+  "details_desc": "Comprehensive precision farming ecosystem integrating machine learning, deep neural networks, and IoT sensors to maximize crop productivity.",
+  "contact_email": "support@geocropai.com",
+  "contact_phone": "+91 98765 43210",
+  "contact_address": "Kolkata, West Bengal, India",
+  "contact_hours": "Mon - Sat: 9:00 AM - 6:00 PM"
+}

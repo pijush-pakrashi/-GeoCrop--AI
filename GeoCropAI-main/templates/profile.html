@@ -1,0 +1,383 @@
+{% extends 'base.html' %} {% block title %}Profile - GeoCropAI{% endblock title %} {% block body %}
+
+<style>
+  .profile-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f5132 0%, #198754 50%, #20c997 100%);
+    padding: 50px 15px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .profile-card {
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.22);
+    width: 100%;
+    max-width: 530px;
+    overflow: hidden;
+  }
+
+  /* Profile Header & Top Back Nav */
+  .profile-header {
+    background: linear-gradient(135deg, #0f5132, #198754);
+    padding: 30px 25px 22px;
+    text-align: center;
+    color: white;
+    position: relative;
+  }
+  .profile-top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .profile-nav-link {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .profile-nav-link:hover {
+    background: white;
+    color: #0f5132;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .profile-header h2 { font-size:1.55rem; font-weight:800; margin:0; }
+  .profile-header p { opacity:0.85; font-size:0.9rem; margin:4px 0 0; }
+
+  /* ===== FACEBOOK-STYLE ANIMATED PROFILE PICTURE (DP) ===== */
+  /* Exact replica: Circular frame, smooth natural dissolve from cartoon to real photo. No extra zoom or rotation */
+  .dp-outer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 24px auto 12px;
+  }
+  .dp-circle-frame {
+    position: relative;
+    width: 165px;
+    height: 165px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #198754;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    background: #000;
+  }
+  
+  /* Cartoon avatar layer (Starts fully visible, then smoothly disappears) */
+  .dp-layer-cartoon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 1.3s ease-in-out;
+  }
+
+  /* Real photo layer (Starts transparent, then seamlessly appears in place) */
+  .dp-layer-real {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 1.3s ease-in-out;
+  }
+
+  /* When transformed: Cartoon fades out, real photo fades in */
+  .dp-circle-frame.transformed .dp-layer-cartoon {
+    opacity: 0;
+  }
+  .dp-circle-frame.transformed .dp-layer-real {
+    opacity: 1;
+  }
+
+  /* Status badge & action buttons below DP */
+  .dp-status-badge {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: #e8f5e9;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dp-action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-upload-photo {
+    background: #198754;
+    color: white;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
+  }
+  .btn-upload-photo:hover {
+    background: #145a32;
+    transform: translateY(-2px);
+  }
+  .btn-replay-fb {
+    background: #f1f5f3;
+    border: 1px solid #d0ded6;
+    color: #2b543e;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .btn-replay-fb:hover {
+    background: #198754;
+    color: white;
+    border-color: #198754;
+  }
+
+  /* Profile body layout */
+  .profile-body { padding: 25px 30px 35px; }
+  .username-display { font-size: 1.6rem; font-weight: 800; color: #0f5132; text-align:center; margin-bottom: 4px; }
+  .email-display { text-align:center; color: #6c757d; font-size: 0.9rem; margin-bottom: 24px; }
+
+  .info-row { display: flex; align-items: center; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0; font-size: 0.92rem; }
+  .info-row:last-child { border: none; }
+  .info-icon { font-size: 1.3rem; }
+  .info-label { color: #6c757d; font-size: 0.82rem; }
+  .info-value { font-weight: 600; color: #212529; }
+  .logout-btn {
+    width: 100%; padding: 12px; background: transparent;
+    color: #dc3545; border: 2px solid #dc3545; border-radius: 12px;
+    font-weight: 600; font-size: 0.95rem; cursor: pointer;
+    transition: all 0.3s; margin-top: 20px;
+  }
+  .logout-btn:hover { background: #dc3545; color: white; }
+</style>
+
+<div class="profile-bg">
+  <div class="profile-card">
+    
+    <!-- Profile Header with Back Navigation Buttons -->
+    <div class="profile-header">
+      <div class="profile-top-nav">
+        <a href="{{ url_for('dashboard') }}" class="profile-nav-link">
+          ⬅️ Back to Dashboard
+        </a>
+        <a href="{{ url_for('hello_world') }}" class="profile-nav-link">
+          🏠 Home
+        </a>
+      </div>
+      <h2>👤 My Profile</h2>
+      <p>Welcome back, {{ user.username }}!</p>
+    </div>
+
+    <div class="profile-body">
+
+      <!-- ===== EXACT REPLICA FACEBOOK-STYLE ANIMATED PROFILE PICTURE TRANSITION ===== -->
+      <!-- Starts with cartoon avatar, smoothly transforms into the original photo via natural dissolve cross-fade -->
+      <div class="dp-outer-wrapper">
+        <div class="dp-circle-frame" id="fbDpFrame" onclick="toggleFbTransition()" title="Click to replay transition">
+          
+          <!-- Layer 1: Cartoon Avatar (Matching reference video) -->
+          {% if user.gender in ['girl', 'female', 'Female', 'FEMALE'] %}
+            <img class="dp-layer-cartoon" id="cartoonAvatarImg" src="{{ url_for('static', filename='images/fb_avatar_girl.png') }}" alt="Cartoon Avatar">
+          {% else %}
+            <img class="dp-layer-cartoon" id="cartoonAvatarImg" src="{{ url_for('static', filename='images/fb_avatar_boy.png') }}" alt="Cartoon Avatar">
+          {% endif %}
+
+          <!-- Layer 2: Original Uploaded Real Photo -->
+          {% if user.profile_pic %}
+            <img class="dp-layer-real" id="realPhotoImg" src="{{ url_for('static', filename='uploads/profiles/' + user.profile_pic) }}" alt="My Profile Photo">
+          {% elif user.gender in ['girl', 'female', 'Female', 'FEMALE'] %}
+            <img class="dp-layer-real" id="realPhotoImg" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80" alt="Profile Photo">
+          {% else %}
+            <img class="dp-layer-real" id="realPhotoImg" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80" alt="Profile Photo">
+          {% endif %}
+
+        </div>
+
+        <div class="dp-status-badge" id="dpStatusBadge">
+          ✨ <span id="dpStatusText">Cartoon Avatar 👋</span>
+        </div>
+
+        <!-- Action Bar: Change Photo & Replay -->
+        <div class="dp-action-bar">
+          <label class="btn-upload-photo" title="Upload your own profile picture">
+            📷 Change Profile Photo
+            <input type="file" id="userPhotoInput" accept="image/*" style="display:none;" onchange="handleUserPhotoUpload(event)">
+          </label>
+          <button type="button" class="btn-replay-fb" onclick="playFbTransition()">
+            🔄 Replay Transition
+          </button>
+        </div>
+      </div>
+
+      <div class="username-display">{{ user.username }}</div>
+      <div class="email-display">✉️ {{ user.email }}</div>
+
+      <!-- User Info -->
+      <div class="info-row">
+        <span class="info-icon">🧑</span>
+        <div><div class="info-label">Farmer Username</div><div class="info-value">{{ user.username }}</div></div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">✉️</span>
+        <div><div class="info-label">Email Address</div><div class="info-value">{{ user.email }}</div></div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🎭</span>
+        <div>
+          <div class="info-label">Gender Profile</div>
+          <div class="info-value">
+            {% if user.gender in ['girl', 'female', 'Female', 'FEMALE'] %}
+              <span class="badge bg-danger text-light px-3 py-1 font-weight-bold" style="border-radius:12px; font-size:0.85rem;">👩 FEMALE</span>
+            {% elif user.gender in ['other', 'Other', 'OTHER'] %}
+              <span class="badge bg-success text-light px-3 py-1 font-weight-bold" style="border-radius:12px; font-size:0.85rem;">🧑 OTHER</span>
+            {% else %}
+              <span class="badge bg-primary text-light px-3 py-1 font-weight-bold" style="border-radius:12px; font-size:0.85rem;">👨 MALE</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📅</span>
+        <div>
+          <div class="info-label">Member Since</div>
+          <div class="info-value">
+            {% if user.date_joined %}
+              {{ user.date_joined.strftime('%B %d, %Y') }}
+            {% else %}
+              Active Member
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <a href="{{ url_for('logout') }}">
+        <button class="logout-btn">🚪 Logout</button>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== FACEBOOK-STYLE PROFILE PICTURE TRANSITION ENGINE =====
+// Start with cartoon avatar, then smoothly and naturally transform into the original photo (natural dissolve)
+let isTransformed = false;
+let transitionTimer = null;
+
+function playFbTransition() {
+  const frame = document.getElementById('fbDpFrame');
+  const badgeText = document.getElementById('dpStatusText');
+
+  // Clear any pending timer
+  if (transitionTimer) clearTimeout(transitionTimer);
+
+  // 1. Reset to cartoon avatar
+  frame.classList.remove('transformed');
+  badgeText.textContent = "Cartoon Avatar 👋";
+  isTransformed = false;
+
+  // 2. Exact timing matching Facebook reference video:
+  // Show cartoon avatar for 1.4 seconds, then smoothly dissolve into the original uploaded photo
+  transitionTimer = setTimeout(() => {
+    frame.classList.add('transformed');
+    badgeText.textContent = "Original Photo ✨";
+    isTransformed = true;
+  }, 1400);
+}
+
+function toggleFbTransition() {
+  const frame = document.getElementById('fbDpFrame');
+  const badgeText = document.getElementById('dpStatusText');
+  if (isTransformed) {
+    frame.classList.remove('transformed');
+    badgeText.textContent = "Cartoon Avatar 👋";
+    isTransformed = false;
+  } else {
+    playFbTransition();
+  }
+}
+
+// User photo upload: Each user uploads and saves their OWN photo permanently to server & database
+function handleUserPhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const badgeText = document.getElementById('dpStatusText');
+  badgeText.textContent = "Uploading photo... ⏳";
+
+  const formData = new FormData();
+  formData.append('profile_photo', file);
+
+  fetch("{{ url_for('upload_profile_photo') }}", {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.photo_url) {
+      // Update real photo image source
+      const realImg = document.getElementById('realPhotoImg');
+      realImg.src = data.photo_url + '?t=' + new Date().getTime();
+      
+      // Automatically run the Facebook-style transition to reveal their new photo!
+      playFbTransition();
+    } else {
+      badgeText.textContent = "Upload failed. Please try again.";
+    }
+  })
+  .catch(err => {
+    // Fallback client-side preview if network error
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('realPhotoImg').src = e.target.result;
+      playFbTransition();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Automatically start transition on page load
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    playFbTransition();
+  }, 1000);
+});
+</script>
+
+{% endblock body %}
